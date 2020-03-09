@@ -17,11 +17,13 @@ from sequana import FastQ
 # This must be defined before the include
 configfile: "config.yaml"
 
-manager = sm.PipelineManager("downsampling", config, fastq=False)
+# this is useless. it is based on sample names but here, with lima, 
+# sample names are lost after the lima_output. prefix
+#manager = sm.PipelineManager("downsampling", config, fastq=False)
 
+import glob
+filenames = glob.glob(config['input_directory'] + os.sep + config['input_pattern'])
 
-
-__rawdata__input = manager.getrawdata()
 if config['downsampling']['input_format'] == 'fastq':
     __downsampling__output = "downsampling/{sample}.fastq.gz"
 elif config['downsampling']['input_format'] == 'fasta':
@@ -29,9 +31,21 @@ elif config['downsampling']['input_format'] == 'fasta':
 elif config['downsampling']['input_format'] == 'sam':
     __downsampling__output = "downsampling/{sample}.sam"
 
+samples = {}
+for filename in filenames:
+    # what should be the sample name ? 
+    # we have no choice here rather than taking the filename and removing known
+    # extensions
+    sample = filename.rsplit("/")[-1].replace(".gz", "")
+    sample = sample.replace(".fastq", "").replace(".fasta", "").replace(".sam", "")
+    samples[sample] = filename
+
+
+__rawdata__input = lambda wildcards: samples[wildcards.sample]
+
 
 rule pipeline:
-    input:expand(__downsampling__output, sample=manager.samples)
+    input:expand(__downsampling__output, sample=samples)
 
 
 if config["downsampling"]['input_format'] == "fastq":
@@ -81,7 +95,8 @@ onsuccess:
     sc.add_makefile()
     print("Once done, please clean up the directory using\n'make clean'")
 
-    for filename in sorted(expand(__downsampling__output, sample=manager.samples)):
+    for filename in sorted(expand(__downsampling__output, sample=samples)):
+
         f = FastQ(filename)
         N = len(f)
         print("{} has {} reads".format(filename, N))

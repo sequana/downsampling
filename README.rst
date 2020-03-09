@@ -1,6 +1,6 @@
 This is is the **downsampling** pipeline from the `Sequana <https://sequana.readthedocs.org>`_ project
 
-:Overview: 
+:Overview: downsample NGS data sets
 :Input: a set of FastQ or FASTA files 
 :Output: a set of downsampled files
 :Status: mature
@@ -48,14 +48,13 @@ This pipelines requires the following executable(s):
 - sequana
 - pigz
 
-.. image:: https://raw.githubusercontent.com/sequana/sequana_downsampling/master/sequana_pipelines/downsampling/dag.png
+.. .. image:: https://raw.githubusercontent.com/sequana/sequana_downsampling/master/sequana_pipelines/downsampling/dag.png
 
 
 Details
 ~~~~~~~~~
 
-This pipeline runs **downsampling** in parallel on the input fastq files (paired or not). 
-A brief sequana summary report is also produced.
+This pipeline runs **downsampling** in parallel on the input fastq or fasta files (paired or not). 
 
 
 Rules and configuration details
@@ -63,4 +62,16 @@ Rules and configuration details
 
 Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/sequana_downsampling/master/sequana_pipelines/downsampling/config.yaml>`_
 to be used with the pipeline. Each rule used in the pipeline may have a section in the configuration file. 
+
+
+Changelog
+~~~~~~~~~
+
+========= ====================================================================
+Version   Description
+========= ====================================================================
+0.8.1     * fix input
+0.8.0     **First release.**
+========= ====================================================================
+
 
