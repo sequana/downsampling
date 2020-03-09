@@ -59,7 +59,7 @@ if config["downsampling"]['input_format'] == "fastq":
             outname = output[0].replace(".gz", "")
             if config['downsampling']['method'] == "random":
                 N = config['downsampling']['max_entries']
-                f.select_random_reads(N * 4, outname)
+                f.select_random_reads(N, outname)
             elif config['downsampling']['method'] == "random_pct":
                 L = len(f)
                 N = int(L * config["downsampling"]["percent"]/100)
@@ -77,7 +77,7 @@ elif config["downsampling"]['input_format'] == "fasta":
             outname = output[0].replace(".gz", "")
             if config['downsampling']['method'] == "random":
                 N = config['downsampling']['max_entries']
-                f.select_random_reads(N * 4, outname)
+                f.select_random_reads(N, outname)
             elif config['downsampling']['method'] == "random_pct":
                 L = len(f)
                 N = int(L * config["downsampling"]["percent"]/100)
