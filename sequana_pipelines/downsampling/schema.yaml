@@ -18,10 +18,10 @@ mapping:
         mapping:
             "input_format":
                 type: str
-                enum: [fastq, fasta, sam]
+                enum: [fastq]
             "method":
                 type: str
-                enum: [random, tail, head]
+                enum: [random]
             "threads":
                 type: int
                 range: { min: 1}

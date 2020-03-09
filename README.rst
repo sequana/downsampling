@@ -45,7 +45,8 @@ Requirements
 
 This pipelines requires the following executable(s):
 
-- TODO
+- sequana
+- pigz
 
 .. image:: https://raw.githubusercontent.com/sequana/sequana_downsampling/master/sequana_pipelines/downsampling/dag.png
 

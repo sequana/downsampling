@@ -5,12 +5,12 @@ import subprocess
 import sys
 from sequana.pipelines_common import get_pipeline_location as getpath
 
-sharedir = getpath('quality_control')
+sharedir = getpath('downsampling')
 
 
 def test_standalone_subprocess():
     directory = tempfile.TemporaryDirectory()
-    cmd = """sequana_pipelines_downsampling --input-directory {} 
+    cmd = """sequana_pipelines_downsampling --input-directory {}
             --working-directory {} --force""".format(sharedir, directory.name)
     subprocess.call(cmd.split())
 
@@ -21,6 +21,7 @@ def test_standalone_script():
     sys.argv = ["test", "--input-directory", sharedir, 
             "--working-directory", directory.name, "--force"]
     m.main()
+
 
 def test_full():
 
@@ -35,7 +36,6 @@ def test_full():
 
         stat = subprocess.call("sh downsampling.sh".split(), cwd=wk)
 
-        assert os.path.exists(wk + "/multi_summary.html")
 
 def test_version():
     cmd = "sequana_pipelines_downsampling --version"
