@@ -22,15 +22,13 @@ class Options(argparse.ArgumentParser):
             use.
 
             In practice, it copies the config file and the pipeline into a
-            directory (downsampling) together with an executable script
+            directory (downsampling) together with an executable script::
 
-            For a local run, use :
-
-                sequana_pipelines_downsampling --input-directory PATH_TO_DATA 
-
-            For a run on a SLURM cluster:
-
-                sequana_pipelines_downsampling --input-directory PATH_TO_DATA 
+                sequana_pipelines_downsampling --input-directory data
+                    --input-pattern "*fasta"
+                    --downsampling-input-format fasta
+                    --downsampling-method random_pct
+                    --downsampling-percent 1
 
         """
         )
@@ -53,9 +51,22 @@ class Options(argparse.ArgumentParser):
 
         pipeline_group = self.add_argument_group("pipeline")
 
-        pipeline_group.add_argument("--downsampling-input-format", 
-            default="fastq", type=str, 
-            help="set input format (only 'fastq' supported for now)")
+        pipeline_group.add_argument("--downsampling-input-format",
+            default="fastq", type=str, choices=["fasta", "fastq", "sam"],
+            help="set input format (only 'fastq', 'fasta', 'sam' supported for now)")
+        pipeline_group.add_argument("--downsampling-method",
+            default="random", type=str, choices=["random", "random_pct"],
+            help="""set the downsampling method to be random based on read
+                counts on read percentage)""")
+        pipeline_group.add_argument("--downsampling-percent",
+            default=10, type=float,
+            help="""Percentage of reads to select""")
+        pipeline_group.add_argument("--downsampling-max-entries",
+            default=1000, type=int,
+            help="""max entries (reads, alignement) to select""")
+        pipeline_group.add_argument("--downsampling-threads",
+            default=4, type=int,
+            help="""max threads to use with pigz""")
 
 
 def main(args=None):
@@ -78,6 +89,13 @@ def main(args=None):
     cfg.input_pattern = options.input_pattern
     cfg.input_readtag = None
     #cfg.paired_data = False
+
+    # --------------------------------------------------- downsampling
+    cfg.downsampling.input_format = options.downsampling_input_format
+    cfg.downsampling.method = options.downsampling_method
+    cfg.downsampling.percent = options.downsampling_percent
+    cfg.downsampling.max_entries = options.downsampling_max_entries
+    cfg.downsampling.threads = options.downsampling_threads
 
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.

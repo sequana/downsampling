@@ -38,6 +38,7 @@ if config["downsampling"]['input_format'] == "fastq":
     rule downsampling:
         input: __rawdata__input
         output: __downsampling__output
+        threads: config["downsampling"]['threads']
         run:
             from sequana import FastQ
             f = FastQ(input[0])
@@ -50,7 +51,25 @@ if config["downsampling"]['input_format'] == "fastq":
                 N = int(L * config["downsampling"]["percent"]/100)
                 f.select_random_reads(N, outname)
 
-            shell("pigz {}".format(outname))
+            shell("pigz -p {} {}".format(threads, outname))
+elif config["downsampling"]['input_format'] == "fasta":
+    rule downsampling:
+        input: __rawdata__input
+        output: __downsampling__output
+        threads: config["downsampling"]['threads']
+        run:
+            from sequana import FastA
+            f = FastA(input[0])
+            outname = output[0].replace(".gz", "")
+            if config['downsampling']['method'] == "random":
+                N = config['downsampling']['max_entries']
+                f.select_random_reads(N * 4, outname)
+            elif config['downsampling']['method'] == "random_pct":
+                L = len(f)
+                N = int(L * config["downsampling"]["percent"]/100)
+                f.select_random_reads(N, outname)
+
+            shell("pigz -p {} {}".format(threads, outname))
 else:
     raise NotImplementedError
 

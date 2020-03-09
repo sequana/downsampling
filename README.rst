@@ -1,9 +1,9 @@
 This is is the **downsampling** pipeline from the `Sequana <https://sequana.readthedocs.org>`_ project
 
 :Overview: 
-:Input: TODO
-:Output: TODO
-:Status: draft
+:Input: a set of FastQ or FASTA files 
+:Output: a set of downsampled files
+:Status: mature
 :Citation: Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352
 
 

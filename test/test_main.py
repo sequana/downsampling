@@ -26,14 +26,21 @@ def test_standalone_script():
 def test_full():
 
     with tempfile.TemporaryDirectory() as directory:
-        print(directory)
         wk = directory
-
         cmd = "sequana_pipelines_downsampling --input-directory {} "
         cmd += "--working-directory {}  --force"
         cmd = cmd.format(sharedir, wk)
         subprocess.call(cmd.split())
+        stat = subprocess.call("sh downsampling.sh".split(), cwd=wk)
 
+    with tempfile.TemporaryDirectory() as directory:
+        wk = directory
+        cmd = "sequana_pipelines_downsampling --input-directory {} "
+        cmd += ' --input-pattern "*fasta"'
+        cmd += " --working-directory {} --downsampling-method random_pct  "
+        cmd += " --downsampling-input-format fasta --force"
+        cmd = cmd.format(sharedir, wk)
+        subprocess.call(cmd.split())
         stat = subprocess.call("sh downsampling.sh".split(), cwd=wk)
 
 
