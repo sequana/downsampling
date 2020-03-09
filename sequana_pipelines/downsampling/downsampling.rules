@@ -1,0 +1,61 @@
+"""downsampling pipeline
+
+Author: Thomas Cokelaer
+Affiliation: Institut Pasteur @ 2020
+
+This pipeline is part of Sequana software (sequana.readthedocs.io)
+
+snakemake -s downsampling.rules --forceall --stats stats.txt --cores 4
+
+
+"""
+import sequana
+from sequana import snaketools as sm
+from sequana import sequana_data
+
+
+# This must be defined before the include
+configfile: "config.yaml"
+
+manager = sm.PipelineManager("downsampling", config, fastq=False)
+
+
+
+__rawdata__input = manager.getrawdata()
+if config['downsampling']['input_format'] == 'fastq':
+    __downsampling__output = "downsampling/{sample}.fastq.gz"
+elif config['downsampling']['input_format'] == 'fasta':
+    __downsampling__output = "downsampling/{sample}.fasta.gz"
+elif config['downsampling']['input_format'] == 'sam':
+    __downsampling__output = "downsampling/{sample}.sam"
+
+
+rule pipeline:
+    input:expand(__downsampling__output, sample=manager.samples)
+
+
+if config["downsampling"]['input_format'] == "fastq":
+    rule downsampling:
+        input: __rawdata__input
+        output: __downsampling__output
+        run:
+            if config['downsampling']['method'] == "random":
+                from sequana import FastQ
+                N = config['downsampling']['max_entries']
+                f = FastQ(input[0])
+                outname = output[0].replace(".gz", "")
+                f.select_random_reads(N * 4, outname)
+                shell("pigz {}".format(outname))
+else:
+    raise NotImplementedError
+
+
+
+onsuccess:
+    from sequana.snaketools import OnSuccessCleaner
+    sc = OnSuccessCleaner(pipeline_name="downsampling")
+    sc.add_makefile()
+    print("Once done, please clean up the directory using\n'make clean'")
+
+onerror:
+    print("An error occurred. See message above.")
