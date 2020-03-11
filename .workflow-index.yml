@@ -1,0 +1,11 @@
+language: Snakemake
+name: sequana_downsampling
+description: Simply downsample your data sets
+url: https://github.com/sequana/sequana_variant_calling/blob/master/sequana_pipelines/downsampling/downsampling.rules
+categories: [downsample]
+authors:
+    - firstname: Thomas
+      lastname: Cokelaer
+      email: thomas.cokelaer@pasteur.fr
+
+
