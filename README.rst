@@ -25,7 +25,9 @@ Usage
 ::
 
     sequana_pipelines_downsampling --help
-    sequana_pipelines_downsampling --input-directory DATAPATH 
+    sequana_pipelines_downsampling --input-directory DATAPATHH
+    sequana_downsampling --downsampling-method random --downsampling-max-entries 100
+
 
 This creates a directory with the pipeline and configuration file. You will then need 
 to execute the pipeline::
@@ -70,6 +72,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.8.2     * add a --run option to execute the pipeline directly
 0.8.1     * fix input and N in the random selection
 0.8.0     **First release.**
 ========= ====================================================================

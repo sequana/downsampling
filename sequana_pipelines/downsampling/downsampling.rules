@@ -25,11 +25,11 @@ import glob
 filenames = glob.glob(config['input_directory'] + os.sep + config['input_pattern'])
 
 if config['downsampling']['input_format'] == 'fastq':
-    __downsampling__output = "downsampling/{sample}.fastq.gz"
+    __downsampling__output = "output/{sample}.fastq.gz"
 elif config['downsampling']['input_format'] == 'fasta':
-    __downsampling__output = "downsampling/{sample}.fasta.gz"
+    __downsampling__output = "output/{sample}.fasta.gz"
 elif config['downsampling']['input_format'] == 'sam':
-    __downsampling__output = "downsampling/{sample}.sam"
+    __downsampling__output = "output/{sample}.sam"
 
 samples = {}
 for filename in filenames:
@@ -64,7 +64,6 @@ if config["downsampling"]['input_format'] == "fastq":
                 L = len(f)
                 N = int(L * config["downsampling"]["percent"]/100)
                 f.select_random_reads(N, outname)
-
             shell("pigz -p {} {}".format(threads, outname))
 elif config["downsampling"]['input_format'] == "fasta":
     rule downsampling:
@@ -72,7 +71,7 @@ elif config["downsampling"]['input_format'] == "fasta":
         output: __downsampling__output
         threads: config["downsampling"]['threads']
         run:
-            from sequana import FastA
+            from sequana import Fasta
             f = FastA(input[0])
             outname = output[0].replace(".gz", "")
             if config['downsampling']['method'] == "random":

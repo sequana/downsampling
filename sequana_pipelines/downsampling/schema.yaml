@@ -21,7 +21,7 @@ mapping:
                 enum: [fastq, fasta]
             "method":
                 type: str
-                enum: [random]
+                enum: [random, random_pct]
             "threads":
                 type: int
                 range: { min: 1}

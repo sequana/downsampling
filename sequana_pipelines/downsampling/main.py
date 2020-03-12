@@ -1,6 +1,7 @@
 import sys
 import os
 import argparse
+import subprocess
 
 from sequana.pipelines_common import *
 from sequana.snaketools import Module
@@ -30,6 +31,10 @@ class Options(argparse.ArgumentParser):
                     --downsampling-method random_pct
                     --downsampling-percent 1
 
+        Input fastq can be compressed (gzip) or not.
+        Currently, input fasta must be decompressed.
+
+
         """
         )
         super(Options, self).__init__(usage=usage, prog=prog, description="",
@@ -57,7 +62,7 @@ class Options(argparse.ArgumentParser):
         pipeline_group.add_argument("--downsampling-method",
             default="random", type=str, choices=["random", "random_pct"],
             help="""set the downsampling method to be random based on read
-                counts on read percentage)""")
+                counts (random) on read percentage (random_pct))""")
         pipeline_group.add_argument("--downsampling-percent",
             default=10, type=float,
             help="""Percentage of reads to select""")
@@ -67,6 +72,9 @@ class Options(argparse.ArgumentParser):
         pipeline_group.add_argument("--downsampling-threads",
             default=4, type=int,
             help="""max threads to use with pigz""")
+
+        pipeline_group.add_argument("--run", default=False, action="store_true",
+            help="Execute the pipeline")
 
 
 def main(args=None):
@@ -99,8 +107,20 @@ def main(args=None):
 
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.
+
+    logger.info("Input data should be {}".format(cfg.downsampling.input_format))
+    if cfg.downsampling.method == "random":
+        logger.info("Your data will be downsampled randomly keeping {} reads".format(
+            cfg.downsampling.max_entries))
+    elif cfg.downsampling.method == "random_pct":
+        logger.info("Your data will be downsampled randomly keeping {}% of the reads".format(
+            cfg.downsampling.percent))
+
+
     manager.teardown()
 
+    if options.run:
+        subprocess.Popen(["sh", "{}.sh".format(NAME)], cwd=NAME)
 
 if __name__ == "__main__":
     main()
