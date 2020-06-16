@@ -3,41 +3,20 @@ import os
 import argparse
 import subprocess
 
-from sequana.pipelines_common import *
-from sequana.snaketools import Module
-from sequana import logger
-logger.level = "INFO"
+from sequana_pipetools.options import *
+from sequana_pipetools.misc import Colors
+from sequana_pipetools.info import sequana_epilog, sequana_prolog
 
 col = Colors()
 
 NAME = "downsampling"
-m = Module(NAME)
-m.is_executable()
 
 
 class Options(argparse.ArgumentParser):
-    def __init__(self, prog=NAME):
-        usage = col.purple(
-            """This script prepares the sequana pipeline downsampling layout to
-            include the Snakemake pipeline and its configuration file ready to
-            use.
-
-            In practice, it copies the config file and the pipeline into a
-            directory (downsampling) together with an executable script::
-
-                sequana_pipelines_downsampling --input-directory data
-                    --input-pattern "*fasta"
-                    --downsampling-input-format fasta
-                    --downsampling-method random_pct
-                    --downsampling-percent 1
-
-        Input fastq can be compressed (gzip) or not.
-        Currently, input fasta must be decompressed.
-
-
-        """
-        )
+    def __init__(self, prog=NAME, epilog=None):
+        usage = col.purple(sequana_prolog.format(**{"name": NAME}))
         super(Options, self).__init__(usage=usage, prog=prog, description="",
+            epilog=epilog,
             formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
 
@@ -48,7 +27,7 @@ class Options(argparse.ArgumentParser):
         # add a snakemake group of options to the parser
         so = SnakemakeOptions(working_directory=NAME)
         so.add_options(self)
-        so = InputOptions(add_input_readtag=False, add_is_paired=False)
+        so = InputOptions(add_input_readtag=False)
         so.add_options(self)
 
         so = GeneralOptions()
@@ -82,39 +61,49 @@ def main(args=None):
     if args is None:
         args = sys.argv
 
-    options = Options(NAME).parse_args(args[1:])
+    # whatever needs to be called by all pipeline before the options parsing
+    from sequana_pipetools.options import before_pipeline
+    before_pipeline(NAME)
 
-    manager = PipelineManager(options, NAME)
+    # option parsing including common epilog
+    options = Options(NAME, epilog=sequana_epilog).parse_args(args[1:])
+
+
+    from sequana.pipelines_common import SequanaManager
+
+    # the real stuff is here
+    manager = SequanaManager(options, NAME)
 
     # create the beginning of the command and the working directory
     manager.setup()
+    from sequana import logger
+    logger.level = options.level
 
     # fill the config file with input parameters
-    cfg = manager.config.config
-    # EXAMPLE TOREPLACE WITH YOUR NEEDS
-    cfg.input_directory = os.path.abspath(options.input_directory)
-    manager.exists(cfg.input_directory)
-    cfg.input_pattern = options.input_pattern
-    cfg.input_readtag = None
-    #cfg.paired_data = False
+    if options.from_project is None:
+        cfg = manager.config.config
+        cfg.input_directory = os.path.abspath(options.input_directory)
+        manager.exists(cfg.input_directory)
+        cfg.input_pattern = options.input_pattern
+        cfg.input_readtag = None
 
-    # --------------------------------------------------- downsampling
-    cfg.downsampling.input_format = options.downsampling_input_format
-    cfg.downsampling.method = options.downsampling_method
-    cfg.downsampling.percent = options.downsampling_percent
-    cfg.downsampling.max_entries = options.downsampling_max_entries
-    cfg.downsampling.threads = options.downsampling_threads
+        # --------------------------------------------------- downsampling
+        cfg.downsampling.input_format = options.downsampling_input_format
+        cfg.downsampling.method = options.downsampling_method
+        cfg.downsampling.percent = options.downsampling_percent
+        cfg.downsampling.max_entries = options.downsampling_max_entries
+        cfg.downsampling.threads = options.downsampling_threads
 
-    # finalise the command and save it; copy the snakemake. update the config
-    # file and save it.
+        # finalise the command and save it; copy the snakemake. update the config
+        # file and save it.
 
-    logger.info("Input data should be {}".format(cfg.downsampling.input_format))
-    if cfg.downsampling.method == "random":
-        logger.info("Your data will be downsampled randomly keeping {} reads".format(
-            cfg.downsampling.max_entries))
-    elif cfg.downsampling.method == "random_pct":
-        logger.info("Your data will be downsampled randomly keeping {}% of the reads".format(
-            cfg.downsampling.percent))
+        logger.info("Input data should be {}".format(cfg.downsampling.input_format))
+        if cfg.downsampling.method == "random":
+            logger.info("Your data will be downsampled randomly keeping {} reads".format(
+                cfg.downsampling.max_entries))
+        elif cfg.downsampling.method == "random_pct":
+            logger.info("Your data will be downsampled randomly keeping {}% of the reads".format(
+                cfg.downsampling.percent))
 
 
     manager.teardown()

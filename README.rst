@@ -72,6 +72,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.8.3     * comply with new API from sequana_pipetools 0.2.4
 0.8.2     * add a --run option to execute the pipeline directly
 0.8.1     * fix input and N in the random selection
 0.8.0     **First release.**

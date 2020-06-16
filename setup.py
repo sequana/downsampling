@@ -4,7 +4,7 @@ from setuptools import setup, find_namespace_packages
 
 _MAJOR               = 0
 _MINOR               = 8
-_MICRO               = 2
+_MICRO               = 3
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -13,7 +13,7 @@ metainfo = {
     'version': version,
     'license' : 'new BSD',
     'url' : "https://github.com/sequana/",
-    'description': "downsample NGS data setse" ,
+    'description': "downsample NGS data sets" ,
     'platforms' : ['Linux', 'Unix', 'MacOsX', 'Windows'],
     'keywords' : ['NGS, sequana, snakemake, fastq, downsampling'],
     'classifiers' : [
@@ -54,7 +54,7 @@ setup(
     packages = ["sequana_pipelines.downsampling",
         'sequana_pipelines.downsampling.data' ],
 
-    install_requires = "sequana",
+    install_requires = open("requirements.txt").read(),
 
     # This is recursive include of data files
     exclude_package_data = {"": ["__pycache__"]},
