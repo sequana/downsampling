@@ -56,7 +56,22 @@ This pipelines requires the following executable(s):
 Details
 ~~~~~~~~~
 
-This pipeline runs **downsampling** in parallel on the input fastq or fasta files (paired or not). 
+This pipeline runs **downsampling** in parallel on the input fastq or fasta files (paired or not).
+
+It can take as input a set of FastQ files, or FastA files. by
+default, the pipeline with randomly select 1000 entries from each input files.
+You can increase this number using --downsampling-max-entries option. If you
+prefer to select a percentage of the entries instead, you can change the
+downsamping method as follows::
+
+    --downsampling-method random_pct
+
+and change the value if needed (default is 10%)::
+
+    --downsampling-percent 20
+
+Note that input FastQ and FastA files can be gzipped. Output files are gzipped.
+
 
 
 Rules and configuration details
