@@ -73,7 +73,7 @@ This pipelines requires the following executable(s):
 Details
 ~~~~~~~~~
 
-This pipeline runs **downsampling** in parallel on the input fastq or fasta files (paired or not).
+This pipeline runs **downsampling** in parallel on the input fastq or fasta files (paired or not). If paired, the one-to-one mapping is conserved.
 
 It can take as input a set of FastQ files, or FastA files. by
 default, the pipeline with randomly select 1000 entries from each input files.
@@ -87,7 +87,8 @@ and change the value if needed (default is 10%)::
 
     --downsampling-percent 20
 
-Note that input FastQ and FastA files can be gzipped. Output files are gzipped.
+Note that input FastQ can be gzipped. Output files are gzipped. FastA input
+files must be compressed for now
 
 
 
