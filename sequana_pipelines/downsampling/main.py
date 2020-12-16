@@ -27,7 +27,7 @@ class Options(argparse.ArgumentParser):
         # add a snakemake group of options to the parser
         so = SnakemakeOptions(working_directory=NAME)
         so.add_options(self)
-        so = InputOptions(add_input_readtag=False)
+        so = InputOptions()
         so.add_options(self)
 
         so = GeneralOptions()
@@ -44,10 +44,10 @@ class Options(argparse.ArgumentParser):
                 counts (random) on read percentage (random_pct))""")
         pipeline_group.add_argument("--downsampling-percent",
             default=10, type=float,
-            help="""Percentage of reads to select""")
+            help="""Percentage of reads to select. Use with method *random_pct* only""")
         pipeline_group.add_argument("--downsampling-max-entries",
             default=1000, type=int,
-            help="""max entries (reads, alignement) to select""")
+            help="""max entries (reads, alignement) to select. Use with method *random* only""")
         pipeline_group.add_argument("--downsampling-threads",
             default=4, type=int,
             help="""max threads to use with pigz""")
@@ -84,8 +84,7 @@ def main(args=None):
         cfg = manager.config.config
         cfg.input_directory = os.path.abspath(options.input_directory)
         manager.exists(cfg.input_directory)
-        cfg.input_pattern = options.input_pattern
-        cfg.input_readtag = None
+        cfg.input_readtag = options.input_readtag
 
         # --------------------------------------------------- downsampling
         cfg.downsampling.input_format = options.downsampling_input_format
@@ -93,6 +92,10 @@ def main(args=None):
         cfg.downsampling.percent = options.downsampling_percent
         cfg.downsampling.max_entries = options.downsampling_max_entries
         cfg.downsampling.threads = options.downsampling_threads
+
+        # by default,
+        if options.downsampling_input_format == "fasta" and options.input_pattern == '*fastq.gz':
+            cfg.input_pattern  = "*fasta.gz"
 
         # finalise the command and save it; copy the snakemake. update the config
         # file and save it.

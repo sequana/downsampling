@@ -10,7 +10,7 @@
 
 input_directory: '.'
 input_pattern: '*.fastq.gz'
-input_readtag: None
+input_readtag: "_R[12]_"
 
 
 ##############################################################################

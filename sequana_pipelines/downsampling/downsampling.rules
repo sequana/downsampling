@@ -17,72 +17,72 @@ from sequana import FastQ
 # This must be defined before the include
 configfile: "config.yaml"
 
-# this is useless. it is based on sample names but here, with lima, 
-# sample names are lost after the lima_output. prefix
-#manager = sm.PipelineManager("downsampling", config, fastq=False)
-
-import glob
-filenames = glob.glob(config['input_directory'] + os.sep + config['input_pattern'])
-
-if config['downsampling']['input_format'] == 'fastq':
-    __downsampling__output = "output/{sample}.fastq.gz"
-elif config['downsampling']['input_format'] == 'fasta':
-    __downsampling__output = "output/{sample}.fasta.gz"
-elif config['downsampling']['input_format'] == 'sam':
-    __downsampling__output = "output/{sample}.sam"
-
-samples = {}
-for filename in filenames:
-    # what should be the sample name ? 
-    # we have no choice here rather than taking the filename and removing known
-    # extensions
-    sample = filename.rsplit("/")[-1].replace(".gz", "")
-    sample = sample.replace(".fastq", "").replace(".fasta", "").replace(".sam", "")
-    samples[sample] = filename
+if config['downsampling']['input_format'] in ['fastq', 'fasta']:
+    manager = sm.PipelineManager("downsampling", config, fastq=True)
+else:
+    # not yet fully tested
+    manager = sm.PipelineManager("downsampling", config, fastq=False)
 
 
-__rawdata__input = lambda wildcards: samples[wildcards.sample]
+__rawdata__input = manager.getrawdata()
+
 
 
 rule pipeline:
-    input:expand(__downsampling__output, sample=samples)
+    input: expand("output/{sample}.done", sample=manager.samples)
+
 
 
 if config["downsampling"]['input_format'] == "fastq":
     rule downsampling:
         input: __rawdata__input
-        output: __downsampling__output
+        output: "output/{sample}.done"
         threads: config["downsampling"]['threads']
         run:
             from sequana import FastQ
-            f = FastQ(input[0])
-            outname = output[0].replace(".gz", "")
+            f1 = FastQ(input[0])
+            outname = "output/" + input[0].split("/")[-1].replace(".gz", "")
             if config['downsampling']['method'] == "random":
                 N = config['downsampling']['max_entries']
-                f.select_random_reads(N, outname)
+                selection = f1.select_random_reads(N, outname)
             elif config['downsampling']['method'] == "random_pct":
-                L = len(f)
+                L = len(f1)
                 N = int(L * config["downsampling"]["percent"]/100)
-                f.select_random_reads(N, outname)
-            shell("pigz -p {} {}".format(threads, outname))
+                selection = f1.select_random_reads(N, outname)
+            shell("pigz -f -p {} {}".format(threads, outname))
+            if len(input) == 2:
+                f2 = FastQ(input[1])
+                outname2 = "output/" + input[1].split("/")[-1].replace(".gz", "")
+                f2.select_random_reads(selection, outname2)
+                shell("pigz -f -p {} {}".format(threads, outname2))
+            shell("touch {}".format(output[0]))
 elif config["downsampling"]['input_format'] == "fasta":
     rule downsampling:
         input: __rawdata__input
-        output: __downsampling__output
+        output: "output/{sample}.done"
         threads: config["downsampling"]['threads']
         run:
-            from sequana import Fasta
-            f = FastA(input[0])
-            outname = output[0].replace(".gz", "")
+            from sequana import FastA
+            f1 = FastA(input[0])
+            # compressed files not yet implemented for fasta
+            #outname = output[0].replace(".gz", "")
+            outname = "output/" + input[0].split("/")[-1]
             if config['downsampling']['method'] == "random":
                 N = config['downsampling']['max_entries']
-                f.select_random_reads(N, outname)
+                selection = f1.select_random_reads(N, outname)
             elif config['downsampling']['method'] == "random_pct":
-                L = len(f)
+                L = len(f1)
                 N = int(L * config["downsampling"]["percent"]/100)
-                f.select_random_reads(N, outname)
+                selection = f1.select_random_reads(N, outname)
 
-            shell("pigz -p {} {}".format(threads, outname))
+            shell("pigz -f -p {} {}".format(threads, outname))
+
+            if len(input) == 2:
+                f2 = FastA(input[1])
+                outname2 = "output/" + input[1].split("/")[-1].replace(".gz", "")
+                f2.select_random_reads(selection, outname2)
+                shell("pigz -f -p {} {}".format(threads, outname2))
+            shell("touch {}".format(output[0]))
 else:
     raise NotImplementedError
 
@@ -91,14 +91,11 @@ else:
 onsuccess:
     from sequana.snaketools import OnSuccessCleaner
     sc = OnSuccessCleaner(pipeline_name="downsampling")
+
+    sc.files_to_remove += ["output/*.done"]
+    sc.custom_commands += "mv output/* . ; rm -rf output"
     sc.add_makefile()
     print("Once done, please clean up the directory using\n'make clean'")
-
-    for filename in sorted(expand(__downsampling__output, sample=samples)):
-
-        f = FastQ(filename)
-        N = len(f)
-        print("{} has {} reads".format(filename, N))
 
 
 

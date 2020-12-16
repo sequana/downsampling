@@ -24,9 +24,13 @@ Usage
 
 ::
 
-    sequana_pipelines_downsampling --help
-    sequana_pipelines_downsampling --input-directory DATAPATHH
+    sequana_downsampling --help
+    sequana_downsampling --input-directory DATAPATHH
     sequana_downsampling --downsampling-method random --downsampling-max-entries 100
+    sequana_downsampling --downsampling-method random_pct --downsampling-percent 10 --downsampling-input-format fasta --input-pattern "whatever*fasta"
+
+Note that the current implementation handles fastq files (zipped or not) and
+fasta files (uncompressed only)
 
 
 This creates a directory with the pipeline and configuration file. You will then need 
@@ -42,6 +46,19 @@ retrieve the pipeline itself and its configuration files and then execute the pi
 
 Or use `sequanix <https://sequana.readthedocs.io/en/master/sequanix.html>`_ interface.
 
+Examples of a set of FastQ zipped files in the current directory:
+
+
+    sequana_downsampling --run --downsampling-method random_pct 
+    cd downsampling
+    make clean
+
+This will create a directory called **downsampling**, and randomly select 10% of
+the input reads for each file with extension .fastq.gz in the current directory.
+Since **-run** is used, the pipeline is executed automatically. The following
+commands will enter into the directory and called a Makefile. This will clean
+the directory for temporary files.
+
 Requirements
 ~~~~~~~~~~~~
 
@@ -50,7 +67,7 @@ This pipelines requires the following executable(s):
 - sequana
 - pigz
 
-.. .. image:: https://raw.githubusercontent.com/sequana/sequana_downsampling/master/sequana_pipelines/downsampling/dag.png
+.. .. image:: https://raw.githubusercontent.com/sequana/downsampling/master/sequana_pipelines/downsampling/dag.png
 
 
 Details
@@ -77,7 +94,7 @@ Note that input FastQ and FastA files can be gzipped. Output files are gzipped.
 Rules and configuration details
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/sequana_downsampling/master/sequana_pipelines/downsampling/config.yaml>`_
+Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/downsampling/master/sequana_pipelines/downsampling/config.yaml>`_
 to be used with the pipeline. Each rule used in the pipeline may have a section in the configuration file. 
 
 
@@ -87,6 +104,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.8.5     * cope with R1/R2 paired data properly. Improved make file
 0.8.4     * add missing MANIFEST to include missing requirements.txt
 0.8.3     * comply with new API from sequana_pipetools 0.2.4
 0.8.2     * add a --run option to execute the pipeline directly
