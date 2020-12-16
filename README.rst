@@ -4,7 +4,11 @@ This is is the **downsampling** pipeline from the `Sequana <https://sequana.read
 :Input: a set of FastQ or FASTA files 
 :Output: a set of downsampled files
 :Status: mature
-:Citation: Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352
+:Citation(sequana): Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352
+:Citation(pipeline): 
+    .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.4047837.svg
+       :target: https://doi.org/10.5281/zenodo.4047837
+
 
 
 Installation
