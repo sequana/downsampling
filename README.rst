@@ -1,9 +1,22 @@
+
+
+.. image:: https://badge.fury.io/py/sequana-downsampling.svg
+     :target: https://pypi.python.org/pypi/sequana_downsampling
+
+.. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
+    :target: http://joss.theoj.org/papers/10.21105/joss.00352
+    :alt: JOSS (journal of open source software) DOI
+
+.. image:: https://github.com/sequana/downsampling/actions/workflows/main.yml/badge.svg
+   :target: https://github.com/sequana/downsampling/actions/workflows/main.yaml 
+
+
 This is is the **downsampling** pipeline from the `Sequana <https://sequana.readthedocs.org>`_ project
 
 :Overview: downsample NGS data sets
 :Input: a set of FastQ or FASTA files 
 :Output: a set of downsampled files
-:Status: mature
+:Status: production
 :Citation(sequana): Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352
 :Citation(pipeline): 
     .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.4047837.svg
