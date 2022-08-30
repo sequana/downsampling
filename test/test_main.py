@@ -5,7 +5,7 @@ import sys
 
 
 from . import test_dir
-sharedir = f"{test_dir}/downsampling"
+sharedir = f"{test_dir}/data"
 
 
 def test_standalone_subprocess():
