@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-# License: 3-clause BSD
 from setuptools import setup, find_namespace_packages
 
 _MAJOR               = 0
-_MINOR               = 8
-_MICRO               = 5
+_MINOR               = 9
+_MICRO               = 0
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -23,8 +21,9 @@ metainfo = {
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: BSD License',
           'Operating System :: OS Independent',
-          'Programming Language :: Python :: 3.5',
-          'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
           'Topic :: Software Development :: Libraries :: Python Modules',
           'Topic :: Scientific/Engineering :: Bio-Informatics',
           'Topic :: Scientific/Engineering :: Information Analysis',
@@ -49,8 +48,7 @@ setup(
     classifiers      = metainfo['classifiers'],
 
     # package installation
-    packages = ["sequana_pipelines.downsampling",
-        'sequana_pipelines.downsampling.data' ],
+    packages = ["sequana_pipelines.downsampling"],
 
     install_requires = open("requirements.txt").read(),
 
@@ -58,13 +56,11 @@ setup(
     exclude_package_data = {"": ["__pycache__"]},
     package_data = {
         '': ['*.yaml', "*.rules", "*.json", "requirements.txt", "*png"],
-        'sequana_pipelines.downsampling.data' : ['*.*'], 
         },
 
     zip_safe=False,
 
     entry_points = {'console_scripts':[
-        'sequana_pipelines_downsampling=sequana_pipelines.downsampling.main:main',
         'sequana_downsampling=sequana_pipelines.downsampling.main:main']
     }
 

@@ -1,17 +1,17 @@
-import easydev
 import os
 import tempfile
 import subprocess
 import sys
-from sequana.pipelines_common import get_pipeline_location as getpath
 
-sharedir = getpath('downsampling')
+
+from . import test_dir
+sharedir = f"{test_dir}/downsampling"
 
 
 def test_standalone_subprocess():
     directory = tempfile.TemporaryDirectory()
-    cmd = """sequana_pipelines_downsampling --input-directory {}
-            --working-directory {} --force""".format(sharedir, directory.name)
+    cmd = f"""sequana_downsampling --input-directory {sharedir}
+            --working-directory {directory.name} --force"""
     subprocess.call(cmd.split())
 
 
@@ -27,7 +27,7 @@ def test_full():
 
     with tempfile.TemporaryDirectory() as directory:
         wk = directory
-        cmd = "sequana_pipelines_downsampling --input-directory {} "
+        cmd = "sequana_downsampling --input-directory {} "
         cmd += "--working-directory {}  --force"
         cmd = cmd.format(sharedir, wk)
         subprocess.call(cmd.split())
@@ -35,7 +35,7 @@ def test_full():
 
     with tempfile.TemporaryDirectory() as directory:
         wk = directory
-        cmd = "sequana_pipelines_downsampling --input-directory {} "
+        cmd = "sequana_downsampling --input-directory {} "
         cmd += ' --input-pattern "*fasta"'
         cmd += " --working-directory {} --downsampling-method random_pct  "
         cmd += " --downsampling-input-format fasta --force"
@@ -45,6 +45,6 @@ def test_full():
 
 
 def test_version():
-    cmd = "sequana_pipelines_downsampling --version"
+    cmd = "sequana_downsampling --version"
     subprocess.call(cmd.split())
 

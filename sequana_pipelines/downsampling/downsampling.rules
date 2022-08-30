@@ -9,22 +9,20 @@ snakemake -s downsampling.rules --forceall --stats stats.txt --cores 4
 
 
 """
-import sequana
-from sequana import snaketools as sm
+from sequana_pipetools import PipelineManager
+
 from sequana import sequana_data
-from sequana import FastQ
 
 # This must be defined before the include
 configfile: "config.yaml"
 
 if config['downsampling']['input_format'] in ['fastq', 'fasta']:
-    manager = sm.PipelineManager("downsampling", config, fastq=True)
+    manager = PipelineManager("downsampling", config, fastq=True)
 else:
     # not yet fully tested
-    manager = sm.PipelineManager("downsampling", config, fastq=False)
+    manager = PipelineManager("downsampling", config, fastq=False)
 
 
-__rawdata__input = manager.getrawdata()
 
 
 
@@ -35,7 +33,7 @@ rule pipeline:
 
 if config["downsampling"]['input_format'] == "fastq":
     rule downsampling:
-        input: __rawdata__input
+        input:  manager.getrawdata()
         output: "output/{sample}.done"
         threads: config["downsampling"]['threads']
         run:
@@ -89,15 +87,8 @@ else:
 
 
 onsuccess:
-    from sequana.snaketools import OnSuccessCleaner
-    sc = OnSuccessCleaner(pipeline_name="downsampling")
-
-    sc.files_to_remove += ["output/*.done"]
-    sc.custom_commands += "mv output/* . ; rm -rf output"
-    sc.add_makefile()
-    print("Once done, please clean up the directory using\n'make clean'")
-
-
+    manager.teardown(extra_files_to_remove=["*.done"])
+    shell("mv output/* . && rm -rf output")
 
 onerror:
     print("An error occurred. See message above.")
