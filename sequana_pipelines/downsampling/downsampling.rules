@@ -11,7 +11,6 @@ snakemake -s downsampling.rules --forceall --stats stats.txt --cores 4
 """
 from sequana_pipetools import PipelineManager
 
-from sequana import sequana_data
 
 # This must be defined before the include
 configfile: "config.yaml"
@@ -24,11 +23,8 @@ else:
 
 
 
-
-
 rule pipeline:
     input: expand("output/{sample}.done", sample=manager.samples)
-
 
 
 if config["downsampling"]['input_format'] == "fastq":
@@ -91,4 +87,4 @@ onsuccess:
     shell("mv output/* . && rm -rf output")
 
 onerror:
-    print("An error occurred. See message above.")
+    manager.onerror()

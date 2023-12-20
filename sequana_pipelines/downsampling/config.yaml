@@ -7,10 +7,9 @@
 # use it, otherwise use input_samples.
 # ============================================================================
 
-
 input_directory: '.'
 input_pattern: '*.fastq.gz'
-input_readtag: "_R[12]_"
+#input_readtag: "_R[12]_"
 
 
 ##############################################################################
@@ -32,7 +31,3 @@ downsampling:
     input_format: fastq
 
 
-##############################################################################
-#
-#onsuccess:
-#    toclean: " slurm*out downsampling.rules config.yaml stats.txt "

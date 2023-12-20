@@ -1,0 +1,13 @@
+name: sequana_downsampling
+
+channels:
+- conda-forge
+- bioconda
+- defaults
+- r
+
+dependencies:
+- pigz
+- pip:
+  - sequana
+
