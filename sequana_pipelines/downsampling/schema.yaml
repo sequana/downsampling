@@ -6,9 +6,9 @@ mapping:
     "input_directory":
         type: str
         required: False
-    "input_readtag":
-        type: str
-        required: False
+    #"input_readtag":
+    #    type: str
+    #    required: False
     "input_pattern":
         type: str
         required: False
