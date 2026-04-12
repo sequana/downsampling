@@ -12,6 +12,10 @@ input_pattern: '*.fastq.gz'
 #input_readtag: "_R[12]_"
 
 
+apptainers:
+    pigz: https://zenodo.org/record/7346805/files/pigz_2.4.0.img
+
+
 ##############################################################################
 # Your section
 #

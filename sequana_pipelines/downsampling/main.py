@@ -13,13 +13,9 @@
 #  documentation: http://sequana.readthedocs.io
 #
 ##############################################################################
-import argparse
 import os
-import shutil
-import subprocess
 import sys
 
-import click_completion
 import rich_click as click
 from sequana_pipetools import SequanaManager
 from sequana_pipetools.options import *
@@ -42,37 +38,52 @@ help = init_click(
 
 
 @click.command(context_settings=help)
+@include_options_from(ClickInputOptions)
 @include_options_from(ClickSnakemakeOptions, working_directory=NAME)
 @include_options_from(ClickSlurmOptions)
-@include_options_from(ClickInputOptions, input_pattern="*.fasta", add_input_readtag=False)
 @include_options_from(ClickGeneralOptions)
 @click.option(
     "--downsampling-input-format",
+    "downsampling_input_format",
     default="fastq",
-    type=click.Choice(["fasta", "fastq"]),
-    help="set input format (only 'fastq', 'fasta', supported for now)",
+    show_default=True,
+    type=click.Choice(["fasta", "fastq", "sam"]),
+    help="set input format (only 'fastq', 'fasta', 'sam' supported for now)",
 )
 @click.option(
     "--downsampling-method",
+    "downsampling_method",
     default="random",
+    show_default=True,
     type=click.Choice(["random", "random_pct"]),
-    help="""set the downsampling method to be random based on read
-                counts (random) on read percentage (random_pct))""",
+    help="downsampling method: random (based on read counts) or random_pct (based on a percentage of reads)",
 )
 @click.option(
     "--downsampling-percent",
-    default=10,
-    type=click.FLOAT,
-    help="""Percentage of reads to select. Use with method *random_pct* only""",
+    "downsampling_percent",
+    default=10.0,
+    show_default=True,
+    type=float,
+    help="percentage of reads to select. Use with method 'random_pct' only",
 )
 @click.option(
     "--downsampling-max-entries",
+    "downsampling_max_entries",
     default=1000,
-    type=click.INT,
-    help="""max entries (reads, alignement) to select. Use with method *random* only""",
+    show_default=True,
+    type=int,
+    help="max entries (reads, alignments) to select. Use with method 'random' only",
 )
-@click.option("--downsampling-threads", default=4, type=click.INT, help="""max threads to use with pigz""")
+@click.option(
+    "--downsampling-threads",
+    "downsampling_threads",
+    default=4,
+    show_default=True,
+    type=int,
+    help="max threads to use with pigz",
+)
 def main(**options):
+
     if options["from_project"]:
         click.echo("--from-project Not yet implemented")
         sys.exit(1)
@@ -84,11 +95,12 @@ def main(**options):
     options = manager.options
     cfg = manager.config.config
 
-    # manager.fill_data_options()
+    from sequana_pipetools import logger
 
-    cfg.input_directory = os.path.abspath(options.input_directory)
-    cfg.input_pattern = options.input_pattern
-    # cfg.input_readtag = options.input_readtag
+    logger.setLevel(options.level)
+    logger.name = "sequana_downsampling"
+
+    manager.fill_data_options()
 
     # --------------------------------------------------- downsampling
     cfg.downsampling.input_format = options.downsampling_input_format
@@ -97,20 +109,15 @@ def main(**options):
     cfg.downsampling.max_entries = options.downsampling_max_entries
     cfg.downsampling.threads = options.downsampling_threads
 
-    # by default,
+    # If input format is fasta, adjust input pattern default
     if options.downsampling_input_format == "fasta" and options.input_pattern == "*fastq.gz":
         cfg.input_pattern = "*fasta.gz"
 
-    # finalise the command and save it; copy the snakemake. update the config
-    # file and save it.
-
-    from sequana_pipetools import logger
-
-    logger.info("Input data should be {}".format(cfg.downsampling.input_format))
+    logger.info(f"Input data should be {cfg.downsampling.input_format}")
     if cfg.downsampling.method == "random":
-        logger.info("Your data will be downsampled randomly keeping {} reads".format(cfg.downsampling.max_entries))
+        logger.info(f"Your data will be downsampled randomly keeping {cfg.downsampling.max_entries} reads")
     elif cfg.downsampling.method == "random_pct":
-        logger.info("Your data will be downsampled randomly keeping {}% of the reads".format(cfg.downsampling.percent))
+        logger.info(f"Your data will be downsampled randomly keeping {cfg.downsampling.percent}% of the reads")
 
     manager.teardown()
 

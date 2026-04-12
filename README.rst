@@ -1,39 +1,49 @@
 
-
 .. image:: https://badge.fury.io/py/sequana-downsampling.svg
-     :target: https://pypi.python.org/pypi/sequana_downsampling
-
-.. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
-    :target: http://joss.theoj.org/papers/10.21105/joss.00352
-    :alt: JOSS (journal of open source software) DOI
+     :target: https://pypi.python.org/pypi/sequana-downsampling
 
 .. image:: https://github.com/sequana/downsampling/actions/workflows/main.yml/badge.svg
-   :target: https://github.com/sequana/downsampling/actions/workflows/main.yaml 
+   :target: https://github.com/sequana/downsampling/actions/workflows
+
+.. image:: https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg
+    :target: https://pypi.python.org/pypi/sequana-downsampling
+    :alt: Python 3.10 | 3.11 | 3.12
+
+.. image:: https://joss.theoj.org/papers/10.21105/joss.00352/status.svg
+    :target: https://joss.theoj.org/papers/10.21105/joss.00352
+    :alt: JOSS (journal of open source software) DOI
 
 
-This is is the **downsampling** pipeline from the `Sequana <https://sequana.readthedocs.org>`_ project
+This is the **downsampling** pipeline from the `Sequana <https://sequana.readthedocs.org>`_ project.
 
-:Overview: downsample NGS data sets
-:Input: a set of FastQ or FASTA files 
-:Output: a set of downsampled files
-:Status: production
-:Citation(sequana): Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352
-:Citation(pipeline): 
-    .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.4047837.svg
-       :target: https://doi.org/10.5281/zenodo.4047837
-
+:Overview: Downsample NGS data sets (FastQ or FastA).
+:Input: A set of FastQ or FastA files (single or paired-end).
+:Output: Downsampled FastQ or FastA files.
+:Status: Production
+:Citation: Cokelaer et al, (2017), 'Sequana': a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI https://doi.org/10.21105/joss.00352
 
 
 Installation
 ~~~~~~~~~~~~
 
-You must install Sequana first::
+::
 
-    pip install sequana
+    pip install sequana_downsampling --upgrade
 
-Then, just install this package::
+You will also need ``pigz`` available on your PATH.
 
-    pip install sequana_downsampling
+
+Quick Start
+~~~~~~~~~~~
+
+**1. Set up the pipeline**::
+
+    sequana_downsampling --input-directory DATAPATH
+
+**2. Run the pipeline**::
+
+    cd downsampling
+    bash downsampling.sh
 
 
 Usage
@@ -42,78 +52,72 @@ Usage
 ::
 
     sequana_downsampling --help
-    sequana_downsampling --input-directory DATAPATHH
-    sequana_downsampling --downsampling-method random --downsampling-max-entries 100
-    sequana_downsampling --downsampling-method random_pct --downsampling-percent 10 --downsampling-input-format fasta --input-pattern "whatever*fasta"
 
-Note that the current implementation handles fastq files (zipped or not) and
-fasta files (uncompressed only)
+Key pipeline-specific options:
 
+``--downsampling-input-format``
+    Input format: ``fastq`` (default), ``fasta``, or ``sam``.
 
-This creates a directory with the pipeline and configuration file. You will then need 
-to execute the pipeline::
+``--downsampling-method``
+    ``random`` (default, keeps a fixed number of reads) or ``random_pct``
+    (keeps a percentage of reads).
+
+``--downsampling-max-entries``
+    Number of reads to keep when using ``random`` (default: 1000).
+
+``--downsampling-percent``
+    Percentage of reads to keep when using ``random_pct`` (default: 10).
+
+``--downsampling-threads``
+    Number of threads used by ``pigz`` to compress output (default: 4).
+
+Examples::
+
+    sequana_downsampling --input-directory DATAPATH \
+        --downsampling-method random --downsampling-max-entries 100
+
+    sequana_downsampling --input-directory DATAPATH \
+        --downsampling-method random_pct --downsampling-percent 10 \
+        --downsampling-input-format fasta --input-pattern "*.fasta"
+
+Run on a SLURM cluster::
 
     cd downsampling
-    sh downsampling.sh  # for a local run
+    sbatch downsampling.sh
 
-This launch a snakemake pipeline. If you are familiar with snakemake, you can 
-retrieve the pipeline itself and its configuration files and then execute the pipeline yourself with specific parameters::
+Or drive Snakemake directly::
 
-    snakemake -s downsampling.rules -c config.yaml --cores 4 --stats stats.txt
+    snakemake -s downsampling.rules --cores 4 --stats stats.txt
 
-Or use `sequanix <https://sequana.readthedocs.io/en/master/sequanix.html>`_ interface.
-
-Examples of a set of FastQ zipped files in the current directory:
-
-
-    sequana_downsampling --run --downsampling-method random_pct 
-    cd downsampling
-    make clean
-
-This will create a directory called **downsampling**, and randomly select 10% of
-the input reads for each file with extension .fastq.gz in the current directory.
-Since **-run** is used, the pipeline is executed automatically. The following
-commands will enter into the directory and called a Makefile. This will clean
-the directory for temporary files.
 
 Requirements
 ~~~~~~~~~~~~
 
-This pipelines requires the following executable(s):
+The following tools must be available (install via conda/bioconda)::
 
-- sequana
-- pigz
+    mamba env create -f environment.yml
 
-.. .. image:: https://raw.githubusercontent.com/sequana/downsampling/master/sequana_pipelines/downsampling/dag.png
-
-
-Details
-~~~~~~~~~
-
-This pipeline runs **downsampling** in parallel on the input fastq or fasta files (paired or not). If paired, the one-to-one mapping is conserved.
-
-It can take as input a set of FastQ files, or FastA files. by
-default, the pipeline with randomly select 1000 entries from each input files.
-You can increase this number using --downsampling-max-entries option. If you
-prefer to select a percentage of the entries instead, you can change the
-downsamping method as follows::
-
-    --downsampling-method random_pct
-
-and change the value if needed (default is 10%)::
-
-    --downsampling-percent 20
-
-Note that input FastQ can be gzipped. Output files are gzipped. FastA input
-files must be compressed for now
+- **sequana** — FastQ/FastA selection (Python API)
+- **pigz** — parallel gzip compression of outputs
 
 
+Pipeline overview
+~~~~~~~~~~~~~~~~~
 
-Rules and configuration details
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The pipeline randomly selects reads from the input files (single or paired).
+If the inputs are paired, the one-to-one mapping between R1 and R2 is
+preserved. FastQ inputs can be gzipped; outputs are gzipped with ``pigz``.
+FastA inputs and outputs are uncompressed.
 
-Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/downsampling/master/sequana_pipelines/downsampling/config.yaml>`_
-to be used with the pipeline. Each rule used in the pipeline may have a section in the configuration file. 
+
+Configuration
+~~~~~~~~~~~~~
+
+Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/downsampling/main/sequana_pipelines/downsampling/config.yaml>`_.
+Key sections:
+
+- ``downsampling`` — method (``random`` / ``random_pct``), ``max_entries``,
+  ``percent``, ``threads``, and ``input_format`` (``fastq`` / ``fasta``)
 
 
 Changelog
@@ -122,12 +126,26 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
-0.8.5     * cope with R1/R2 paired data properly. Improved make file
-0.8.4     * add missing MANIFEST to include missing requirements.txt
-0.8.3     * comply with new API from sequana_pipetools 0.2.4
-0.8.2     * add a --run option to execute the pipeline directly
-0.8.1     * fix input and N in the random selection
+0.10.0    * Migrate to Poetry / pyproject.toml packaging
+          * Simplify __init__.py using importlib.metadata
+          * Rewrite CLI with rich_click (replaces argparse)
+          * Update CI to use setup-micromamba with generate-run-shell
+          * Add ``localrules: pipeline``
+          * Add ``tools.txt`` and ``environment.yml``
+          * Refresh README badges and usage examples
+0.9.0     * Maintenance release
+0.8.5     * Cope with R1/R2 paired data properly. Improved make file
+0.8.4     * Add missing MANIFEST to include missing requirements.txt
+0.8.3     * Comply with new API from sequana_pipetools 0.2.4
+0.8.2     * Add a --run option to execute the pipeline directly
+0.8.1     * Fix input and N in the random selection
 0.8.0     **First release.**
 ========= ====================================================================
 
 
+Contribute & Code of Conduct
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To contribute to this project, please take a look at the
+`Contributing Guidelines <https://github.com/sequana/sequana/blob/main/CONTRIBUTING.rst>`_ first. Please note that this project is released with a
+`Code of Conduct <https://github.com/sequana/sequana/blob/main/CONDUCT.md>`_. By contributing to this project, you agree to abide by its terms.
