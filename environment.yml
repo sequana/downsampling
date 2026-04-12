@@ -1,0 +1,13 @@
+name: sequana_downsampling
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - pigz
+  - graphviz
+  - snakemake-minimal
+  - pulp>=2.8
+  - pip:
+    - sequana>=0.17
+    - sequana_pipetools>=1.5.0
