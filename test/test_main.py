@@ -20,16 +20,6 @@ def test_standalone_subprocess(tmp_path):
     assert os.path.exists(wkdir / "config.yaml")
 
 
-<<<<<<< HEAD
-def test_standalone_script():
-    directory = tempfile.TemporaryDirectory()
-
-    args = ["--input-directory", sharedir, "--working-directory", directory.name, "--force"]
-
-    runner = CliRunner()
-    results = runner.invoke(main, args)
-    assert results.exit_code == 0
-=======
 def test_standalone_script(tmp_path):
     wkdir = tmp_path / "test"
     wkdir.mkdir()
@@ -41,7 +31,6 @@ def test_standalone_script(tmp_path):
     runner = CliRunner()
     runner.invoke(main, args)
     assert os.path.exists(wkdir / "config.yaml")
->>>>>>> origin/master
 
 
 def test_full(tmp_path):
