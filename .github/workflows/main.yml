@@ -1,0 +1,65 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+  pull_request:
+    branches-ignore: []
+  schedule:
+    - cron: '0 0 2 * *'
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix:
+        python: ['3.11', '3.12']
+      fail-fast: false
+
+    steps:
+
+    - name: install graphviz
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y graphviz
+
+    - name: checkout git repo
+      uses: actions/checkout@v4
+
+    - name: conda/mamba
+      uses: mamba-org/setup-micromamba@v2
+      with:
+          environment-file: environment.yml
+          generate-run-shell: true
+          create-args: >-
+            python=${{ matrix.python }}
+          cache-environment: true
+          cache-downloads: true
+
+    - name: install package itself
+      shell: micromamba-shell {0}
+      run: |
+        pip install .
+
+    - name: Install dependencies
+      shell: micromamba-shell {0}
+      run: |
+        pip install coveralls pytest-cov pytest pytest-xdist
+
+    - name: testing
+      shell: micromamba-shell {0}
+      run: |
+        pytest -v --cov-report term-missing --cov=sequana_pipelines.downsampling
+
+    - name: coveralls
+      continue-on-error: true
+      shell: micromamba-shell {0}
+      run: |
+        echo $COVERALLS_REPO_TOKEN
+        coveralls --service=github
+      env:
+          GITHUB_TOKEN: ${{ github.token }}

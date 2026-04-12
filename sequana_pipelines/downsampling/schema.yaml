@@ -12,6 +12,14 @@ mapping:
     "input_pattern":
         type: str
         required: False
+    "exclude_pattern":
+        type: str
+        required: False
+        nullable: True
+
+    "apptainers":
+        type: any
+        required: False
 
     "downsampling":
         type: map
